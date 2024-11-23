@@ -112,8 +112,6 @@ def writeToComprimido(string_data):
     with open(output_file, 'wb') as file:
         file.write(binary_data)
 
-    print(f"Data has been written to {output_file}")
-
 def compress(file_name):
     text = textToString(file_name)
     char_to_freq = charFrequencies(text)
