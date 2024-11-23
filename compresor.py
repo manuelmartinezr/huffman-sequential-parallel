@@ -60,16 +60,6 @@ def charFrequencies(text):
             char_to_freq[char] += 1
     return char_to_freq
 
-txt = "AAA BBC"
-char_to_freq = charFrequencies(txt)
-print(char_to_freq)
-keys = list(char_to_freq.keys())
-values = list(char_to_freq.values())
-root = huffmanTree(keys, values)
-huffman_codes = huffmanCodes(root)
-for char, code in huffman_codes.items():
-    print(f"Character:{char}, code:{code}")
-
 def codeText(text, huffman_codes):
     coded = ""
     for char in text:
@@ -89,5 +79,49 @@ def decodeText(text, huffman_codes):
             temp_code = ""
     return decoded
 
-print(codeText(txt, huffman_codes))
-print(decodeText(codeText(txt, huffman_codes), huffman_codes))
+def textToString(file_name):
+    try:
+        with open(file_name, 'r', encoding='utf-8') as file:  # Open the file in read mode with UTF-8 encoding
+            return file.read()  # Read the entire file content into a string
+    except FileNotFoundError:
+        return "Error: File not found."
+    except Exception as e:
+        return f"An error occurred: {e}"
+
+def writeToComprimido(string_data):
+    # Define the output file name
+    output_file = 'comprimido.ec2'
+
+    # Ensure the string_data is a valid binary string (only '1' and '0')
+    if not all(bit in '01' for bit in string_data):
+        raise ValueError("The input string contains invalid characters. Only '1' and '0' are allowed.")
+
+    # Convert the binary string into a byte array (no padding)
+    binary_data = bytearray()
+
+    # Iterate over the bit string in chunks of 8 bits (1 byte each)
+    for i in range(0, len(string_data), 8):
+        byte = string_data[i:i + 8]  # Take the next 8 bits
+        if len(byte) < 8:
+            # If the byte is smaller than 8 bits, it's fine to leave it as it is, no padding here
+            byte = byte.ljust(8, '0')  # This could be avoided if you want exact bits
+        # Convert the 8-bit string to an integer and append it as byte
+        binary_data.append(int(byte, 2))
+
+    # Open the file in write binary mode ('wb') to write the data as bytes
+    with open(output_file, 'wb') as file:
+        file.write(binary_data)
+
+    print(f"Data has been written to {output_file}")
+
+def compress(file_name):
+    text = textToString(file_name)
+    char_to_freq = charFrequencies(text)
+    keys = list(char_to_freq.keys())
+    values = list(char_to_freq.values())
+    root = huffmanTree(keys, values)
+    huffman_codes = huffmanCodes(root)
+    data = codeText(text, huffman_codes)
+    writeToComprimido(data)
+
+compress('text1.txt')
