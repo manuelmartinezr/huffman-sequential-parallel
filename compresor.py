@@ -67,18 +67,6 @@ def codeText(text, huffman_codes):
         coded += code
     return coded
 
-def decodeText(text, huffman_codes):
-    chars = {v:k for k, v in huffman_codes.items()}
-    decoded = ""
-    temp_code = ""
-    for code in text:
-        temp_code += code
-        if temp_code in chars:
-            char = chars[temp_code]
-            decoded += char
-            temp_code = ""
-    return decoded
-
 def textToString(file_name):
     try:
         with open(file_name, 'r', encoding='utf-8') as file:  # Open the file in read mode with UTF-8 encoding
