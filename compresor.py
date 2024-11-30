@@ -14,6 +14,7 @@
 
 # Python program for Huffman Coding
 import heapq
+import numpy as np
 
 class Node:
     def __init__(self, symbol=None, frequency=None):
@@ -76,7 +77,7 @@ def textToString(file_name):
     except Exception as e:
         return f"An error occurred: {e}"
 
-def writeToComprimido(string_data):
+def writeToComprimido(string_data, data_length):
     # Define the output file name
     output_file = 'comprimido.ec2'
 
@@ -98,6 +99,7 @@ def writeToComprimido(string_data):
 
     # Open the file in write binary mode ('wb') to write the data as bytes
     with open(output_file, 'wb') as file:
+        file.write(data_length.to_bytes(4, byteorder='big'))
         file.write(binary_data)
 
 def compress(file_name):
@@ -107,7 +109,8 @@ def compress(file_name):
     values = list(char_to_freq.values())
     root = huffmanTree(keys, values)
     huffman_codes = huffmanCodes(root)
+    np.save('huffman_codes.npy', huffman_codes)
     data = codeText(text, huffman_codes)
-    writeToComprimido(data)
+    writeToComprimido(data, len(data))
 
-compress('text1.txt')
+compress('LaBiblia.txt')
