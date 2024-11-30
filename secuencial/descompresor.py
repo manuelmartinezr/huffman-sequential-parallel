@@ -21,15 +21,10 @@ def decompress(file_name):
     binary_data, original_length = readCompressedFile(file_name)
     bit_string = ''.join(f"{byte:08b}" for byte in binary_data)
     bit_string = bit_string[:original_length]
-    huffman_codes = np.load('huffman_codes.npy', allow_pickle=True).item()
+    huffman_codes = np.load('secuencial/huffman_codes.npy', allow_pickle=True).item()
     decoded_text = decodeText(bit_string, huffman_codes)
 
-    with open('descomprimidop-ec2.txt', 'w', encoding='utf-8') as file:
+    with open('secuencial/descomprimidop-ec2.txt', 'w', encoding='utf-8') as file:
         file.write(decoded_text)
 
-decompress('comprimido.ec2')
-
-def readFile(file_name):
-    with open(file_name, 'r') as file:
-        return file.read()
-    
+decompress('secuencial/comprimido.ec2')

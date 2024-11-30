@@ -79,7 +79,7 @@ def textToString(file_name):
 
 def writeToComprimido(string_data, data_length):
     # Define the output file name
-    output_file = 'comprimido.ec2'
+    output_file = 'secuencial/comprimido.ec2'
 
     # Ensure the string_data is a valid binary string (only '1' and '0')
     if not all(bit in '01' for bit in string_data):
@@ -109,7 +109,7 @@ def compress(file_name):
     values = list(char_to_freq.values())
     root = huffmanTree(keys, values)
     huffman_codes = huffmanCodes(root)
-    np.save('huffman_codes.npy', huffman_codes)
+    np.save('secuencial/huffman_codes.npy', huffman_codes)
     data = codeText(text, huffman_codes)
     writeToComprimido(data, len(data))
 
