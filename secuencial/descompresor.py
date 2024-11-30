@@ -24,7 +24,7 @@ def decompress(file_name):
     huffman_codes = np.load('secuencial/huffman_codes.npy', allow_pickle=True).item()
     decoded_text = decodeText(bit_string, huffman_codes)
 
-    with open('secuencial/descomprimidop-ec2.txt', 'w', encoding='utf-8') as file:
+    with open('secuencial/descomprimido-ec2.txt', 'w', encoding='utf-8') as file:
         file.write(decoded_text)
 
 decompress('secuencial/comprimido.ec2')
