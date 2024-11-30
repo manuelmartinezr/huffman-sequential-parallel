@@ -1,4 +1,5 @@
 import numpy as np
+import time
 
 def decodeText(bit_string, huffman_codes):
     reverse_codes = {v: k for k, v in huffman_codes.items()}
@@ -18,6 +19,7 @@ def readCompressedFile(file_name):
     return binary_data, original_length
 
 def decompress(file_name):
+    start_time = time.time()
     binary_data, original_length = readCompressedFile(file_name)
     bit_string = ''.join(f"{byte:08b}" for byte in binary_data)
     bit_string = bit_string[:original_length]
@@ -26,5 +28,7 @@ def decompress(file_name):
 
     with open('secuencial/descomprimido-ec2.txt', 'w', encoding='utf-8') as file:
         file.write(decoded_text)
+    end_time = time.time()
+    print(f"{end_time - start_time}")
 
 decompress('secuencial/comprimido.ec2')

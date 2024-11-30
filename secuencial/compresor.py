@@ -15,6 +15,7 @@
 # Python program for Huffman Coding
 import heapq
 import numpy as np
+import time
 
 class Node:
     def __init__(self, symbol=None, frequency=None):
@@ -103,6 +104,7 @@ def writeToComprimido(string_data, data_length):
         file.write(binary_data)
 
 def compress(file_name):
+    start_time = time.time()
     text = textToString(file_name)
     char_to_freq = charFrequencies(text)
     keys = list(char_to_freq.keys())
@@ -112,5 +114,7 @@ def compress(file_name):
     np.save('secuencial/huffman_codes.npy', huffman_codes)
     data = codeText(text, huffman_codes)
     writeToComprimido(data, len(data))
+    end_time = time.time()
+    print(f"{end_time - start_time}")
 
 compress('LaBiblia.txt')
