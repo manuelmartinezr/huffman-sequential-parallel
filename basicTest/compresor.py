@@ -1,19 +1,17 @@
-# import sys
+import sys
 
-# if len(sys.argv) < 2:
-#     print("Usage: python3 compresor.py <fileName>")
-#     sys.exit(1)
+if len(sys.argv) < 2:
+    print("Usage: python3 compresor.py <fileName>")
+    sys.exit(1)
 
-# file_name = sys.argv[1]
+file_name = sys.argv[1]
 
-# try:
-#     with open(file_name, 'r') as file:
-#         content = file.read()
-# except FileNotFoundError:
-#     print(f"Error: File '{file_name}' not found.")
+try:
+    with open(file_name, 'r') as file:
+        content = file.read()
+except FileNotFoundError:
+    print(f"Error: File '{file_name}' not found.")
 
-# Python program for Huffman Coding
-import heapq
 import numpy as np
 import time
 
@@ -80,7 +78,7 @@ def textToString(file_name):
 
 def writeToComprimido(string_data, data_length):
     # Define the output file name
-    output_file = 'secuencial/comprimido.ec2'
+    output_file = 'comprimido.ec2'
 
     # Ensure the string_data is a valid binary string (only '1' and '0')
     if not all(bit in '01' for bit in string_data):
@@ -111,7 +109,7 @@ def compress(file_name):
     values = list(char_to_freq.values())
     root = huffmanTree(keys, values)
     huffman_codes = huffmanCodes(root)
-    np.save('secuencial/huffman_codes.npy', huffman_codes)
+    np.save('huffman_codes.npy', huffman_codes)
     data = codeText(text, huffman_codes)
     writeToComprimido(data, len(data))
     end_time = time.time()

@@ -40,7 +40,7 @@ def decompress(file_name):
         bit_string = bit_string[:original_length]
 
         # Cargar los códigos de Huffman
-        huffman_codes = np.load('paralelo/huffman_codes.npy', allow_pickle=True).item()
+        huffman_codes = np.load('huffman_codes.npy', allow_pickle=True).item()
         synchronization_code = huffman_codes[chr(257)]
         # Dividir el flujo de bits en segmentos basados en el código de sincronización
         # Encontrar las posiciones de los marcadores
@@ -85,7 +85,7 @@ def decompress(file_name):
         full_decoded_text = ''.join(decoded_fragments)
 
         # Escritura del archivo descomprimido
-        with open('paralelo/descomprimidop-ec2.txt', 'w', encoding='utf-8') as file:
+        with open('descomprimidop-ec2.txt', 'w', encoding='utf-8') as file:
             file.write(full_decoded_text)
         end_time = time.time()
         # Impresión del tiempo de ejecución

@@ -55,7 +55,7 @@ def charFrequencies(text):
     return char_to_freq
 
 def writeToCompressed(data, original_length, data_segments):
-    output_file = 'paralelo/comprimidop.ec2'
+    output_file = 'comprimidop.ec2'
     binary_data = bytearray()
     for i in range(0, len(data), 8):
         byte = data[i:i+8]
@@ -119,7 +119,7 @@ def compress(file_name):
         huffman_codes = huffmanCodes(root_node)
 
         # Guardado de los códigos de Huffman
-        np.save('paralelo/huffman_codes.npy', huffman_codes)
+        np.save('huffman_codes.npy', huffman_codes)
     else:
         huffman_codes = None
         synchronization_symbol = None

@@ -1,6 +1,20 @@
 import numpy as np
 import time
 
+import sys
+
+if len(sys.argv) < 2:
+    print("Usage: python3 descompresor.py <fileName>")
+    sys.exit(1)
+
+file_name = sys.argv[1]
+
+try:
+    with open(file_name, 'rb') as file:
+        content = file.read()
+except FileNotFoundError:
+    print(f"Error: File '{file_name}' not found.")
+
 def decodeText(bit_string, huffman_codes):
     reverse_codes = {v: k for k, v in huffman_codes.items()}
     current_code = ''
@@ -23,12 +37,12 @@ def decompress(file_name):
     binary_data, original_length = readCompressedFile(file_name)
     bit_string = ''.join(f"{byte:08b}" for byte in binary_data)
     bit_string = bit_string[:original_length]
-    huffman_codes = np.load('secuencial/huffman_codes.npy', allow_pickle=True).item()
+    huffman_codes = np.load('huffman_codes.npy', allow_pickle=True).item()
     decoded_text = decodeText(bit_string, huffman_codes)
 
-    with open('secuencial/descomprimido-ec2.txt', 'w', encoding='utf-8') as file:
+    with open('descomprimido-ec2.txt', 'w', encoding='utf-8') as file:
         file.write(decoded_text)
     end_time = time.time()
     print(f"{end_time - start_time}")
 
-decompress('secuencial/comprimido.ec2')
+decompress('comprimido.ec2')
