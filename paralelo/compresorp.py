@@ -54,7 +54,7 @@ def charFrequencies(text):
         char_to_freq[char] = char_to_freq.get(char, 0) + 1
     return char_to_freq
 
-def writeToCompressed(data, original_length):
+def writeToCompressed(data, original_length, data_segments):
     output_file = 'paralelo/comprimidop.ec2'
     binary_data = bytearray()
     for i in range(0, len(data), 8):
@@ -64,6 +64,9 @@ def writeToCompressed(data, original_length):
         binary_data.append(int(byte, 2))
     with open(output_file, 'wb') as file:
         file.write(original_length.to_bytes(4, byteorder='big'))
+        # Guardar el número de segmentos
+        num_segments = len(data_segments)
+        file.write(num_segments.to_bytes(4, byteorder='big'))
         file.write(binary_data)
 
 def compress(file_name):
@@ -105,6 +108,10 @@ def compress(file_name):
             for char, count in freq_dict.items():
                 combined_freq[char] = combined_freq.get(char, 0) + count
 
+        # Agregar un símbolo especial para el marcador de sincronización
+        synchronization_symbol = chr(257)  # Usamos un carácter fuera del rango estándar
+        combined_freq[synchronization_symbol] = 1  # Frecuencia mínima
+
         # Construcción del árbol de Huffman y códigos
         chars = list(combined_freq.keys())
         freqs = list(combined_freq.values())
@@ -115,36 +122,44 @@ def compress(file_name):
         np.save('paralelo/huffman_codes.npy', huffman_codes)
     else:
         huffman_codes = None
+        synchronization_symbol = None
 
-    # Broadcast de los códigos de Huffman
+    # Broadcast de los códigos de Huffman y el símbolo de sincronización
     huffman_codes = comm.bcast(huffman_codes, root=0)
+    synchronization_symbol = comm.bcast(synchronization_symbol, root=0)
+    synchronization_code = huffman_codes[synchronization_symbol]
 
     # Codificación local
     local_encoded = ''.join(huffman_codes[char] for char in local_text)
-    local_encoded_bytes = np.frombuffer(local_encoded.encode('ascii'), dtype='B')
-    local_encoded_size = np.array(len(local_encoded_bytes), dtype='i')
+
+    # Añadir el marcador de sincronización al inicio del segmento codificado
+    local_encoded = synchronization_code + local_encoded
+
+    # Obtener el tamaño del segmento codificado
+    local_encoded_size = np.array(len(local_encoded), dtype='i')
 
     # Recolección de tamaños codificados
     encoded_sizes = comm.gather(local_encoded_size, root=0)
 
     if rank == 0:
         total_encoded_size = sum(encoded_sizes)
-        encoded_data = np.empty(total_encoded_size, dtype='B')
-        displacements = np.zeros(size, dtype='i')
-        displacements[1:] = np.cumsum(encoded_sizes[:-1])
+        encoded_data = ''
+        data_segments = []
     else:
         encoded_data = None
-        displacements = None
+        data_segments = None
 
-    # Recolección de datos codificados usando Gatherv
-    comm.Gatherv(local_encoded_bytes, [encoded_data, encoded_sizes, displacements, MPI.BYTE], root=0)
+    # Recolección de datos codificados
+    encoded_fragments = comm.gather(local_encoded, root=0)
 
     if rank == 0:
-        # Convertir los datos recolectados a string
-        full_encoded_data = encoded_data.tobytes().decode('ascii')
+        # Concatenar los segmentos codificados
+        encoded_data = ''.join(encoded_fragments)
+        # Para uso posterior en writeToCompressed
+        data_segments = encoded_fragments
 
         # Escritura del archivo comprimido
-        writeToCompressed(full_encoded_data, len(full_encoded_data))
+        writeToCompressed(encoded_data, len(encoded_data), data_segments)
         end_time = time.time()
         # Imprimir el tiempo de ejecución
         print(f"{end_time - start_time}")
