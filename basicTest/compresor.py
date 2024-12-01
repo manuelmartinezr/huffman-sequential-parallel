@@ -14,6 +14,7 @@ except FileNotFoundError:
 
 import numpy as np
 import time
+import heapq
 
 class Node:
     def __init__(self, symbol=None, frequency=None):
