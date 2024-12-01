@@ -1,17 +1,4 @@
 import sys
-
-if len(sys.argv) < 2:
-    print("Usage: python3 compresor.py <fileName>")
-    sys.exit(1)
-
-file_name = sys.argv[1]
-
-try:
-    with open(file_name, 'r') as file:
-        content = file.read()
-except FileNotFoundError:
-    print(f"Error: File '{file_name}' not found.")
-
 import numpy as np
 import time
 import heapq
@@ -116,4 +103,9 @@ def compress(file_name):
     end_time = time.time()
     print(f"{end_time - start_time}")
 
-compress('LaBiblia.txt')
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: python3 compresor.py <fileName>")
+        sys.exit(1)
+    file_name = sys.argv[1]
+    compress(file_name)

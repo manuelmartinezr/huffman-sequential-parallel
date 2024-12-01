@@ -3,18 +3,6 @@ import time
 
 import sys
 
-if len(sys.argv) < 2:
-    print("Usage: python3 descompresor.py <fileName>")
-    sys.exit(1)
-
-file_name = sys.argv[1]
-
-try:
-    with open(file_name, 'rb') as file:
-        content = file.read()
-except FileNotFoundError:
-    print(f"Error: File '{file_name}' not found.")
-
 def decodeText(bit_string, huffman_codes):
     reverse_codes = {v: k for k, v in huffman_codes.items()}
     current_code = ''
@@ -45,4 +33,9 @@ def decompress(file_name):
     end_time = time.time()
     print(f"{end_time - start_time}")
 
-decompress('comprimido.ec2')
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: python3 descompresor.py <fileName>")
+        sys.exit(1)
+    file_name = sys.argv[1]
+    decompress(file_name)
