@@ -56,13 +56,8 @@ def codeText(text, huffman_codes):
     return coded
 
 def textToString(file_name):
-    try:
-        with open(file_name, 'r', encoding='utf-8') as file:  # Open the file in read mode with UTF-8 encoding
-            return file.read()  # Read the entire file content into a string
-    except FileNotFoundError:
-        return "Error: File not found."
-    except Exception as e:
-        return f"An error occurred: {e}"
+    with open(file_name, 'r', encoding='ISO-8859-1', newline='') as file:
+        return file.read()
 
 def writeToComprimido(string_data, data_length):
     # Define the output file name
@@ -90,18 +85,22 @@ def writeToComprimido(string_data, data_length):
         file.write(binary_data)
 
 def compress(file_name):
-    start_time = time.time()
-    text = textToString(file_name)
-    char_to_freq = charFrequencies(text)
-    keys = list(char_to_freq.keys())
-    values = list(char_to_freq.values())
-    root = huffmanTree(keys, values)
-    huffman_codes = huffmanCodes(root)
-    np.save('huffman_codes.npy', huffman_codes)
-    data = codeText(text, huffman_codes)
-    writeToComprimido(data, len(data))
-    end_time = time.time()
-    print(f"{end_time - start_time}")
+    try:
+        start_time = time.time()
+        text = textToString(file_name)
+        char_to_freq = charFrequencies(text)
+        keys = list(char_to_freq.keys())
+        values = list(char_to_freq.values())
+        root = huffmanTree(keys, values)
+        huffman_codes = huffmanCodes(root)
+        np.save('huffman_codes.npy', huffman_codes)
+        data = codeText(text, huffman_codes)
+        writeToComprimido(data, len(data))
+        end_time = time.time()
+        print(f"{end_time - start_time}")
+    except Exception as e:
+        print(f"An error occurred during compression: {e}")
+        sys.exit(1)
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

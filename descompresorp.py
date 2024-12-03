@@ -22,7 +22,7 @@ def decodeText(bit_string, huffman_codes):
         if current_code in reverse_codes:
             symbol = reverse_codes[current_code]
             # Ignorar el símbolo de sincronización en la decodificación
-            if ord(symbol) != 257:
+            if ord(symbol) != 255:
                 decoded_text += symbol
             current_code = ''
     return decoded_text
@@ -32,7 +32,7 @@ def decompress(file_name):
     rank = comm.Get_rank()
     size = comm.Get_size()
 
-    # Lectura y distribución del flujo de bits comprimido
+    # Lectura y preparación en el proceso root
     if rank == 0:
         start_time = time.time()
         binary_data, original_length, num_segments = readCompressedFile(file_name)
@@ -40,42 +40,48 @@ def decompress(file_name):
         bit_string = bit_string[:original_length]
 
         # Cargar los códigos de Huffman
-        huffman_codes = np.load('huffman_codes.npy', allow_pickle=True).item()
-        synchronization_code = huffman_codes[chr(257)]
+        huffman_codes = np.load('huffman_codesp.npy', allow_pickle=True).item()
+        synchronization_code = huffman_codes[chr(255)]
+
         # Dividir el flujo de bits en segmentos basados en el código de sincronización
-        # Encontrar las posiciones de los marcadores
         indices = []
         index = bit_string.find(synchronization_code)
         while index != -1:
             indices.append(index)
             index = bit_string.find(synchronization_code, index + len(synchronization_code))
-        # Añadir el final de la cadena
-        indices.append(len(bit_string))
+        indices.append(len(bit_string))  # Añadir el final de la cadena
 
         # Extraer los segmentos
         segments = []
         for i in range(len(indices) - 1):
-            start = indices[i]
-            end = indices[i+1]
-            # Excluir el marcador del segmento
+            start = indices[i] + len(synchronization_code)  # Saltar el código de sincronización
+            end = indices[i + 1]
             segment = bit_string[start:end]
             segments.append(segment)
+
+        # Distribuir los segmentos entre los procesos
+        segments_per_process = [[] for _ in range(size)]
+        for idx, segment in enumerate(segments):
+            process_index = idx % size  # Distribuir de manera cíclica
+            segments_per_process[process_index].append(segment)
     else:
         huffman_codes = None
-        segments = None
         synchronization_code = None
+        segments_per_process = None
         start_time = None
 
-    # Broadcast de los códigos de Huffman y el símbolo de sincronización
+    # Difundir los códigos y el tiempo de inicio a todos los procesos
     huffman_codes = comm.bcast(huffman_codes, root=0)
     synchronization_code = comm.bcast(synchronization_code, root=0)
     start_time = comm.bcast(start_time, root=0)
 
-    # Distribuir los segmentos a los procesos
-    local_segment = comm.scatter(segments, root=0)
+    # Cada proceso recibe su lista de segmentos
+    local_segments = comm.scatter(segments_per_process, root=0)
 
     # Decodificación local
-    local_decoded = decodeText(local_segment, huffman_codes)
+    local_decoded = ''
+    for segment in local_segments:
+        local_decoded += decodeText(segment, huffman_codes)
 
     # Recolección de los textos decodificados
     decoded_fragments = comm.gather(local_decoded, root=0)
@@ -85,12 +91,11 @@ def decompress(file_name):
         full_decoded_text = ''.join(decoded_fragments)
 
         # Escritura del archivo descomprimido
-        with open('descomprimidop-ec2.txt', 'w', encoding='utf-8') as file:
+        with open('descomprimidop-ec2.txt', 'w', encoding='ISO-8859-1', newline='') as file:
             file.write(full_decoded_text)
         end_time = time.time()
         # Impresión del tiempo de ejecución
         print(f"{end_time - start_time}")
-    # Fin de la función decompress
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:

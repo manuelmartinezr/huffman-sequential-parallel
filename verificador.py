@@ -1,7 +1,7 @@
 import sys
 
 def readFile(file_name):
-    with open(file_name, 'r') as file:
+    with open(file_name, 'r', errors='ignore') as file:
         return file.read()
 
 def verify(file1, file2):

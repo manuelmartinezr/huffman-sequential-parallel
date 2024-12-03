@@ -39,7 +39,8 @@ def huffmanCodes(node, code="", huffman_codes=None):
 
 def textToString(file_name):
     try:
-        with open(file_name, 'r', encoding='utf-8') as file:
+        # Cambiado a encoding='ISO-8859-1', newline=''
+        with open(file_name, 'r', encoding='ISO-8859-1', newline='') as file:
             return file.read()
     except FileNotFoundError:
         print("Error: archivo no encontrado.")
@@ -108,8 +109,8 @@ def compress(file_name):
             for char, count in freq_dict.items():
                 combined_freq[char] = combined_freq.get(char, 0) + count
 
-        # Agregar un símbolo especial para el marcador de sincronización
-        synchronization_symbol = chr(257)  # Usamos un carácter fuera del rango estándar
+        # Usar un símbolo de sincronización dentro del rango ISO-8859-1
+        synchronization_symbol = chr(255)  # Carácter ÿ
         combined_freq[synchronization_symbol] = 1  # Frecuencia mínima
 
         # Construcción del árbol de Huffman y códigos
@@ -119,7 +120,7 @@ def compress(file_name):
         huffman_codes = huffmanCodes(root_node)
 
         # Guardado de los códigos de Huffman
-        np.save('huffman_codes.npy', huffman_codes)
+        np.save('huffman_codesp.npy', huffman_codes)
     else:
         huffman_codes = None
         synchronization_symbol = None

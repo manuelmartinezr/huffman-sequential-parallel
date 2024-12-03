@@ -28,7 +28,7 @@ def decompress(file_name):
     huffman_codes = np.load('huffman_codes.npy', allow_pickle=True).item()
     decoded_text = decodeText(bit_string, huffman_codes)
 
-    with open('descomprimido-ec2.txt', 'w', encoding='utf-8') as file:
+    with open('descomprimido-ec2.txt', 'w', encoding='ISO-8859-1', newline='') as file:
         file.write(decoded_text)
     end_time = time.time()
     print(f"{end_time - start_time}")
