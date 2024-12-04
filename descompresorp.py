@@ -40,7 +40,10 @@ def decompress(file_name):
         bit_string = bit_string[:original_length]
 
         # Cargar los códigos de Huffman
-        huffman_codes = np.load('huffman_codesp.npy', allow_pickle=True).item()
+        if file_name == 'comprimido.ec2':
+            huffman_codes = np.load('huffman_codes.npy', allow_pickle=True).item()
+        else:
+            huffman_codes = np.load('huffman_codesp.npy', allow_pickle=True).item()
         synchronization_code = huffman_codes[chr(255)]
 
         # Dividir el flujo de bits en segmentos basados en el código de sincronización
